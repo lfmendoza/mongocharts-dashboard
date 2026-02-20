@@ -1,0 +1,26 @@
+# Environment
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Video script (no versionar)
+docs/VIDEO_SCRIPT.md
+
+# Data (opcional: descomentar si el CSV es muy grande)
+# data/raw/*.csv
