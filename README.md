@@ -1,6 +1,6 @@
 # CD Pipeline Analytics
 
-Dashboard de métricas DevOps (deployments, builds, pipelines) con ingesta CSV a MongoDB Atlas y visualización en MongoDB Charts.
+Dashboard de métricas DevOps (deployments, builds, pipelines) con ingesta CSV a MongoDB Atlas y visualización en MongoDB Charts. [https://youtu.be/1S47Xgn2-68]
 
 ## Arquitectura
 
