@@ -69,9 +69,11 @@ Requisitos:
 
 ### 3. Dashboard en MongoDB Charts
 
-1. En Atlas: ir a Charts y conectar el cluster.
-2. Seleccionar la colección `platform_analytics.pipeline_events`.
-3. Crear dashboard siguiendo [docs/DASHBOARD_SPEC.md](docs/DASHBOARD_SPEC.md).
+**Guía paso a paso:** [docs/GUIA_DASHBOARD.md](docs/GUIA_DASHBOARD.md)
+
+1. En Atlas → Charts → conectar el cluster.
+2. Crear Data Sources tipo "Charts View" con las pipelines de [docs/pipelines_for_charts.json](docs/pipelines_for_charts.json).
+3. Crear dashboard y añadir gráficos por data source.
 
 ### 4. Pipelines de agregación avanzadas
 

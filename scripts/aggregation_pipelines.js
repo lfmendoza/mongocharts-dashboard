@@ -101,8 +101,7 @@ const pipeline_2_rolling_avg_duration = [
     $group: {
       _id: { $dateToString: { format: "%Y-%m-%d", date: "$timestamp" } },
       avg_duration: { $avg: "$duration_seconds" },
-      count: { $sum: 1 },
-      doc: { $first: "$$ROOT" }
+      count: { $sum: 1 }
     }
   },
   {
@@ -180,7 +179,8 @@ const pipeline_3_percentiles_by_team = [
       p90_seconds: { $arrayElemAt: ["$durations", "$p90_idx"] },
       p99_seconds: { $arrayElemAt: ["$durations", "$p99_idx"] }
     }
-  }
+  },
+  { $project: { team: 1, p50_seconds: 1, p90_seconds: 1, p99_seconds: 1, _id: 0 } }
 ];
 
 const pipeline_4_duration_histogram_with_failures = [
@@ -206,6 +206,22 @@ const pipeline_4_duration_histogram_with_failures = [
   {
     $project: {
       range: "$_id",
+      range_label: {
+        $switch: {
+          branches: [
+            { case: { $eq: ["$_id", "overflow"] }, then: "1200+ s" },
+            { case: { $eq: ["$_id", 0] }, then: "0-60 s" },
+            { case: { $eq: ["$_id", 60] }, then: "60-120 s" },
+            { case: { $eq: ["$_id", 120] }, then: "120-180 s" },
+            { case: { $eq: ["$_id", 180] }, then: "180-300 s" },
+            { case: { $eq: ["$_id", 300] }, then: "300-450 s" },
+            { case: { $eq: ["$_id", 450] }, then: "450-600 s" },
+            { case: { $eq: ["$_id", 600] }, then: "600-900 s" },
+            { case: { $eq: ["$_id", 900] }, then: "900-1200 s" }
+          ],
+          default: { $concat: [{ $toString: "$_id" }, "+ s"] }
+        }
+      },
       count: 1,
       failed: 1,
       failure_rate_pct: {
@@ -283,7 +299,8 @@ const pipeline_5_author_efficiency_score = [
           },
           2
         ]
-      }
+      },
+      _id: 0
     }
   },
   { $sort: { efficiency_score: -1 } }
@@ -293,7 +310,8 @@ const view_deployments_by_week = [
   { $match: { timestamp: { $exists: true } } },
   { $match: { event_type: "deployment" } },
   { $group: { _id: { $dateToString: { format: "%Y-W%V", date: "$timestamp" } }, count: { $sum: 1 } } },
-  { $sort: { _id: 1 } }
+  { $sort: { _id: 1 } },
+  { $project: { week: "$_id", count: 1, _id: 0 } }
 ];
 const view_cfr_by_region = [
   { $match: { event_type: "deployment", status: { $in: ["success", "failed"] } } },
@@ -304,7 +322,8 @@ const view_top_failure_reasons = [
   { $match: { status: "failed", failure_reason: { $ne: "" } } },
   { $group: { _id: "$failure_reason", count: { $sum: 1 } } },
   { $sort: { count: -1 } },
-  { $limit: 10 }
+  { $limit: 10 },
+  { $project: { failure_reason: "$_id", count: 1, _id: 0 } }
 ];
 const view_sla_by_team = [
   { $group: { _id: "$team", total: { $sum: 1 }, sla_met: { $sum: "$sla_met" } } },
@@ -312,7 +331,8 @@ const view_sla_by_team = [
 ];
 const view_trigger_distribution = [
   { $group: { _id: "$trigger", count: { $sum: 1 } } },
-  { $sort: { count: -1 } }
+  { $sort: { count: -1 } },
+  { $project: { trigger: "$_id", count: 1, _id: 0 } }
 ];
 
 const pipeline_6_failure_correlation_analysis = [
@@ -351,7 +371,8 @@ const pipeline_6_failure_correlation_analysis = [
   {
     $project: {
       environment: "$_id",
-      top_reasons: { $slice: [{ $sortArray: { input: "$reasons", sortBy: { count: -1 } } }, 5] }
+      top_reasons: { $slice: [{ $sortArray: { input: "$reasons", sortBy: { count: -1 } } }, 5] },
+      _id: 0
     }
   }
 ];
